@@ -1,0 +1,11 @@
+tipo,categoria,valor,descricao,data
+EXPENSE,Alimentação,89.50,Supermercado Extra,2024-01-15
+EXPENSE,Transporte,45.00,Uber,2024-01-16
+INCOME,Salário,5000.00,Salário Janeiro,2024-01-05
+EXPENSE,Moradia,1200.00,Aluguel Janeiro,2024-01-10
+EXPENSE,Lazer,120.00,Cinema,2024-01-20
+EXPENSE,Saúde,250.00,Consulta Médica,2024-01-22
+EXPENSE,Alimentação,67.80,Restaurante,2024-01-25
+INCOME,Freelance,800.00,Projeto Web,2024-01-28
+EXPENSE,Educação,350.00,Curso Online,2024-01-30
+EXPENSE,Transporte,150.00,Combustível,2024-02-02

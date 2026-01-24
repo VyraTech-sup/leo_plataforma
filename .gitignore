@@ -25,8 +25,13 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+<<<<<<< HEAD
 .env*.local
 .env
+=======
+.env
+.env*.local
+>>>>>>> a83b8fa (Primeiro commit da plataforma)
 
 # vercel
 .vercel
@@ -34,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+<<<<<<< HEAD
+=======
+
+# prisma
+prisma/migrations/*
+!prisma/migrations/.gitkeep
+
+# uploads
+/public/uploads
+>>>>>>> a83b8fa (Primeiro commit da plataforma)
