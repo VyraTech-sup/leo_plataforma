@@ -1,7 +1,9 @@
 <<<<<<< HEAD
+
 # leo_plataforma
-Plataforma de Gestão Financeira
-=======
+
+# Plataforma de Gestão Financeira
+
 # 💰 LMG Platform - Gestão Financeira e Patrimonial
 
 Plataforma completa de gestão financeira pessoal com dashboard interativo, gráficos em tempo real e controle total sobre suas finanças.
@@ -62,19 +64,19 @@ Plataforma completa de gestão financeira pessoal com dashboard interativo, grá
 
 ## 🛠️ Stack Tecnológica
 
-| Categoria | Tecnologia |
-|-----------|-----------|
-| **Framework** | Next.js 14 (App Router) |
-| **Linguagem** | TypeScript (strict mode, sem any) |
-| **Estilização** | TailwindCSS + shadcn/ui |
-| **Banco de Dados** | PostgreSQL + Prisma ORM |
-| **Autenticação** | NextAuth (Credentials) |
-| **Validação** | Zod |
-| **Formulários** | React Hook Form |
-| **Gráficos** | Recharts |
-| **Tabelas** | TanStack Table |
-| **State** | Zustand |
-| **UI Primitives** | Radix UI |
+| Categoria          | Tecnologia                        |
+| ------------------ | --------------------------------- |
+| **Framework**      | Next.js 14 (App Router)           |
+| **Linguagem**      | TypeScript (strict mode, sem any) |
+| **Estilização**    | TailwindCSS + shadcn/ui           |
+| **Banco de Dados** | PostgreSQL + Prisma ORM           |
+| **Autenticação**   | NextAuth (Credentials)            |
+| **Validação**      | Zod                               |
+| **Formulários**    | React Hook Form                   |
+| **Gráficos**       | Recharts                          |
+| **Tabelas**        | TanStack Table                    |
+| **State**          | Zustand                           |
+| **UI Primitives**  | Radix UI                          |
 
 ## 📦 Instalação e Setup
 
@@ -123,22 +125,38 @@ NODE_ENV="development"
 
 ### 4. Configure o Banco de Dados
 
+````bash
+## Scripts principais para rodar localmente ou no Vercel
+
 ```bash
-# Gera o Prisma Client
-npm run db:generate
+# Desenvolvimento
+npm run dev
+
+# Build de produção
+npm run build
+
+# Iniciar produção local (após build)
+npm run start
+````
+
+> O deploy na Vercel funciona com as configurações padrão Next.js. Não use Vite, react-scripts ou --prefix client.
+> npm run db:generate
 
 # Cria as tabelas no banco
+
 npm run db:migrate
 
 # Popula com dados de exemplo
+
 npm run db:seed
-```
+
+````
 
 ### 5. Inicie o Servidor de Desenvolvimento
 
 ```bash
 npm run dev
-```
+````
 
 Acesse: **http://localhost:3000**
 
@@ -146,12 +164,13 @@ Acesse: **http://localhost:3000**
 
 Após o seed, você pode fazer login com:
 
-| Tipo | Email | Senha |
-|------|-------|-------|
-| **Admin** | admin@lmg.com | admin123 |
-| **Usuário** | user@lmg.com | user123 |
+| Tipo        | Email         | Senha    |
+| ----------- | ------------- | -------- |
+| **Admin**   | admin@lmg.com | admin123 |
+| **Usuário** | user@lmg.com  | user123  |
 
 > O usuário comum já vem com:
+>
 > - 3 contas (Nubank, Poupança, Carteira)
 > - 1 cartão de crédito
 > - 42 transações (6 meses)
@@ -253,21 +272,27 @@ npm run setup            # Instala, migra e seed em um comando
 ## 📊 Modelos de Dados
 
 ### User
+
 - id, name, email, password, role
 
 ### Account
+
 - id, name, type, institution, balance, currency
 
 ### Transaction
+
 - id, type, category, amount, description, date
 
 ### Card
+
 - id, name, brand, limit, closingDay, dueDay
 
 ### Goal
+
 - id, name, targetAmount, currentAmount, deadline
 
 ### Investment
+
 - id, name, type, amount, currentValue, profitability
 
 ## 🤝 Contribuindo
@@ -289,4 +314,5 @@ Este projeto é privado e proprietário.
 ---
 
 **🌟 Desenvolvido com Next.js, TypeScript e ❤️**
->>>>>>> a83b8fa (Primeiro commit da plataforma)
+
+> > > > > > > a83b8fa (Primeiro commit da plataforma)
