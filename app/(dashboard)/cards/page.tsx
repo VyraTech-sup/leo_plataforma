@@ -3,10 +3,22 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 import { Plus, CreditCard, Edit, Trash2, Calendar } from "lucide-react"
@@ -49,14 +61,14 @@ const cardBrands = [
 ]
 
 const cardColors = [
-  { name: "Azul", value: "#3b82f6" },
-  { name: "Verde", value: "#10b981" },
-  { name: "Vermelho", value: "#ef4444" },
-  { name: "Roxo", value: "#8b5cf6" },
-  { name: "Laranja", value: "#f97316" },
-  { name: "Rosa", value: "#ec4899" },
-  { name: "Preto", value: "#000000" },
-  { name: "Cinza", value: "#6b7280" },
+  { name: "Verde", value: "hsl(var(--success))" },
+  { name: "Roxo", value: "hsl(var(--secondary))" },
+  { name: "Azul", value: "hsl(var(--info))" },
+  { name: "Amarelo", value: "hsl(var(--warning))" },
+  { name: "Vermelho", value: "hsl(var(--destructive))" },
+  { name: "Cinza", value: "hsl(var(--muted))" },
+  { name: "Branco", value: "hsl(var(--background))" },
+  { name: "Preto", value: "#0A0E27" },
 ]
 
 export default function CardsPage() {
@@ -180,8 +192,8 @@ export default function CardsPage() {
           <h2 className="text-3xl font-bold tracking-tight">Cartões</h2>
           <p className="text-muted-foreground">Gerencie seus cartões de crédito</p>
         </div>
-        <Dialog 
-          open={isOpen} 
+        <Dialog
+          open={isOpen}
           onOpenChange={(open) => {
             setIsOpen(open)
             if (!open) {
@@ -210,13 +222,15 @@ export default function CardsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="lastFourDigits">Últimos 4 Dígitos</Label>
-                  <Input 
-                    id="lastFourDigits" 
-                    {...register("lastFourDigits")} 
+                  <Input
+                    id="lastFourDigits"
+                    {...register("lastFourDigits")}
                     placeholder="1234"
                     maxLength={4}
                   />
-                  {errors.lastFourDigits && <p className="text-sm text-destructive">{errors.lastFourDigits.message}</p>}
+                  {errors.lastFourDigits && (
+                    <p className="text-sm text-destructive">{errors.lastFourDigits.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -227,22 +241,26 @@ export default function CardsPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {cardBrands.map((brand) => (
-                        <SelectItem key={brand} value={brand}>{brand}</SelectItem>
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.brand && <p className="text-sm text-destructive">{errors.brand.message}</p>}
+                  {errors.brand && (
+                    <p className="text-sm text-destructive">{errors.brand.message}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="limit">Limite Total</Label>
-                <Input 
-                  id="limit" 
-                  type="number" 
-                  step="0.01" 
-                  {...register("limit")} 
-                  placeholder="0.00" 
+                <Input
+                  id="limit"
+                  type="number"
+                  step="0.01"
+                  {...register("limit")}
+                  placeholder="0.00"
                 />
                 {errors.limit && <p className="text-sm text-destructive">{errors.limit.message}</p>}
               </div>
@@ -250,28 +268,32 @@ export default function CardsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="closingDay">Dia de Fechamento</Label>
-                  <Input 
-                    id="closingDay" 
-                    type="number" 
-                    min="1" 
-                    max="31" 
-                    {...register("closingDay")} 
-                    placeholder="15" 
+                  <Input
+                    id="closingDay"
+                    type="number"
+                    min="1"
+                    max="31"
+                    {...register("closingDay")}
+                    placeholder="15"
                   />
-                  {errors.closingDay && <p className="text-sm text-destructive">{errors.closingDay.message}</p>}
+                  {errors.closingDay && (
+                    <p className="text-sm text-destructive">{errors.closingDay.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="dueDay">Dia de Vencimento</Label>
-                  <Input 
-                    id="dueDay" 
-                    type="number" 
-                    min="1" 
-                    max="31" 
-                    {...register("dueDay")} 
-                    placeholder="25" 
+                  <Input
+                    id="dueDay"
+                    type="number"
+                    min="1"
+                    max="31"
+                    {...register("dueDay")}
+                    placeholder="25"
                   />
-                  {errors.dueDay && <p className="text-sm text-destructive">{errors.dueDay.message}</p>}
+                  {errors.dueDay && (
+                    <p className="text-sm text-destructive">{errors.dueDay.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -284,7 +306,9 @@ export default function CardsPage() {
                       type="button"
                       onClick={() => setValue("color", color.value)}
                       className={`h-10 rounded-md border-2 transition-all ${
-                        selectedColor === color.value ? "border-primary ring-2 ring-primary ring-offset-2" : "border-transparent"
+                        selectedColor === color.value
+                          ? "border-primary ring-2 ring-primary ring-offset-2"
+                          : "border-transparent"
                       }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
@@ -313,8 +337,8 @@ export default function CardsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
-          <Card 
-            key={card.id} 
+          <Card
+            key={card.id}
             className="overflow-hidden"
             style={{ borderTop: `4px solid ${card.color || "#6b7280"}` }}
           >
@@ -328,7 +352,7 @@ export default function CardsPage() {
                   <p className="text-xs text-muted-foreground">Número</p>
                   <p className="text-lg font-mono">•••• {card.lastFourDigits}</p>
                 </div>
-                
+
                 <div className="flex items-center justify-between text-xs">
                   <div>
                     <p className="text-muted-foreground">Bandeira</p>
@@ -354,11 +378,21 @@ export default function CardsPage() {
                 </div>
 
                 <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(card)} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(card)}
+                    className="flex-1"
+                  >
                     <Edit className="h-3 w-3 mr-1" />
                     Editar
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDelete(card.id)} className="flex-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(card.id)}
+                    className="flex-1"
+                  >
                     <Trash2 className="h-3 w-3 mr-1" />
                     Excluir
                   </Button>
@@ -387,4 +421,3 @@ export default function CardsPage() {
     </div>
   )
 }
-

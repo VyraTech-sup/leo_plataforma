@@ -3,7 +3,13 @@
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
 
@@ -16,6 +22,10 @@ interface TransactionFiltersProps {
   filters: {
     search: string
     category: string
+    subcategory: string
+    paymentMethod: string
+    competenceMonth: string
+    status: string
     accountId: string
     type: string
     startDate: string
@@ -39,11 +49,24 @@ const COMMON_CATEGORIES = [
 export function TransactionFilters({ filters, onFiltersChange }: TransactionFiltersProps) {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [categories, setCategories] = useState<string[]>(COMMON_CATEGORIES)
+  const [subcategories, setSubcategories] = useState<string[]>([])
 
   useEffect(() => {
     fetchAccounts()
     fetchCategories()
   }, [])
+
+  // Atualiza subcategorias ao trocar categoria
+  useEffect(() => {
+    if (filters.category) {
+      fetch(`/api/transactions/subcategories?category=${encodeURIComponent(filters.category)}`)
+        .then((res) => (res.ok ? res.json() : { subcategories: [] }))
+        .then((data) => setSubcategories(data.subcategories || []))
+        .catch(() => setSubcategories([]))
+    } else {
+      setSubcategories([])
+    }
+  }, [filters.category])
 
   const fetchAccounts = async () => {
     try {
@@ -62,9 +85,7 @@ export function TransactionFilters({ filters, onFiltersChange }: TransactionFilt
       const response = await fetch("/api/transactions/categories")
       if (response.ok) {
         const data = await response.json()
-        const uniqueCategories = Array.from(
-          new Set([...COMMON_CATEGORIES, ...data.categories])
-        )
+        const uniqueCategories = Array.from(new Set([...COMMON_CATEGORIES, ...data.categories]))
         setCategories(uniqueCategories)
       }
     } catch (error) {
@@ -76,6 +97,10 @@ export function TransactionFilters({ filters, onFiltersChange }: TransactionFilt
     onFiltersChange({
       search: "",
       category: "",
+      subcategory: "",
+      paymentMethod: "",
+      competenceMonth: "",
+      status: "",
       accountId: "",
       type: "",
       startDate: "",
@@ -106,7 +131,13 @@ export function TransactionFilters({ filters, onFiltersChange }: TransactionFilt
           <Label htmlFor="category">Categoria</Label>
           <Select
             value={filters.category || "ALL"}
-            onValueChange={(value) => onFiltersChange({ ...filters, category: value === "ALL" ? "" : value })}
+            onValueChange={(value) =>
+              onFiltersChange({
+                ...filters,
+                category: value === "ALL" ? "" : value,
+                subcategory: "",
+              })
+            }
           >
             <SelectTrigger id="category">
               <SelectValue placeholder="Todas" />
@@ -123,10 +154,85 @@ export function TransactionFilters({ filters, onFiltersChange }: TransactionFilt
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="subcategory">Subcategoria</Label>
+          <Select
+            value={filters.subcategory || "ALL"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, subcategory: value === "ALL" ? "" : value })
+            }
+            disabled={!filters.category || subcategories.length === 0}
+          >
+            <SelectTrigger id="subcategory">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas</SelectItem>
+              {subcategories.map((subcat) => (
+                <SelectItem key={subcat} value={subcat}>
+                  {subcat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
+          <Select
+            value={filters.paymentMethod || "ALL"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, paymentMethod: value === "ALL" ? "" : value })
+            }
+          >
+            <SelectTrigger id="paymentMethod">
+              <SelectValue placeholder="Todas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todas</SelectItem>
+              <SelectItem value="Débito">Débito</SelectItem>
+              <SelectItem value="Crédito">Crédito</SelectItem>
+              <SelectItem value="Pix">Pix</SelectItem>
+              <SelectItem value="Transferência">Transferência</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="competenceMonth">Mês de Competência</Label>
+          <Input
+            id="competenceMonth"
+            type="month"
+            value={filters.competenceMonth}
+            onChange={(e) => onFiltersChange({ ...filters, competenceMonth: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Status</Label>
+          <Select
+            value={filters.status || "ALL"}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, status: value === "ALL" ? "" : value })
+            }
+          >
+            <SelectTrigger id="status">
+              <SelectValue placeholder="Todos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Todos</SelectItem>
+              <SelectItem value="Confirmada">Confirmada</SelectItem>
+              <SelectItem value="Pendente">Pendente</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="account">Conta</Label>
           <Select
             value={filters.accountId || "ALL"}
-            onValueChange={(value) => onFiltersChange({ ...filters, accountId: value === "ALL" ? "" : value })}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, accountId: value === "ALL" ? "" : value })
+            }
           >
             <SelectTrigger id="account">
               <SelectValue placeholder="Todas" />
@@ -146,7 +252,9 @@ export function TransactionFilters({ filters, onFiltersChange }: TransactionFilt
           <Label htmlFor="type">Tipo</Label>
           <Select
             value={filters.type || "ALL"}
-            onValueChange={(value) => onFiltersChange({ ...filters, type: value === "ALL" ? "" : value })}
+            onValueChange={(value) =>
+              onFiltersChange({ ...filters, type: value === "ALL" ? "" : value })
+            }
           >
             <SelectTrigger id="type">
               <SelectValue placeholder="Todos" />

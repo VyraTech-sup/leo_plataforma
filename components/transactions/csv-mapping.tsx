@@ -4,7 +4,13 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { MapPin } from "lucide-react"
 
 interface ParsedRow {
@@ -14,7 +20,7 @@ interface ParsedRow {
 interface CsvMappingProps {
   headers: string[]
   data: ParsedRow[]
-  onMapping: (mapping: Record<string, string>) => void
+  onMapping?: (mapping: Record<string, string>) => void
   onBack: () => void
 }
 
@@ -37,7 +43,10 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
       const autoMapping: Record<string, string> = {}
 
       const normalizeHeader = (header: string) =>
-        header.toLowerCase().trim().replace(/[^a-z]/g, "")
+        header
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z]/g, "")
 
       headers.forEach((header) => {
         const normalized = normalizeHeader(header)
@@ -83,9 +92,7 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
           <MapPin className="h-5 w-5" />
           Mapeamento de Colunas
         </CardTitle>
-        <CardDescription>
-          Associe as colunas do CSV aos campos do sistema
-        </CardDescription>
+        <CardDescription>Associe as colunas do CSV aos campos do sistema</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="rounded-lg bg-muted p-4">
@@ -100,7 +107,7 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
             <div key={field.key} className="space-y-2">
               <Label htmlFor={field.key}>{field.label}</Label>
               <Select
-                value={mapping[field.key] || ""}
+                value={String(mapping[field.key] || "")}
                 onValueChange={(value) => handleMappingChange(field.key, value)}
               >
                 <SelectTrigger id={field.key}>
@@ -108,8 +115,8 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
                 </SelectTrigger>
                 <SelectContent>
                   {headers.map((header) => (
-                    <SelectItem key={header} value={header}>
-                      {header} (ex: {data[0]?.[header]})
+                    <SelectItem key={String(header)} value={String(header)}>
+                      {String(header)} (ex: {data[0]?.[header]})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -124,17 +131,23 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
             <div key={field.key} className="space-y-2">
               <Label htmlFor={field.key}>{field.label}</Label>
               <Select
-                value={mapping[field.key] || ""}
-                onValueChange={(value) => handleMappingChange(field.key, value)}
+                value={
+                  mapping[field.key] === undefined || mapping[field.key] === "none"
+                    ? "none"
+                    : String(mapping[field.key])
+                }
+                onValueChange={(value) =>
+                  handleMappingChange(field.key, value === "none" ? "" : value)
+                }
               >
                 <SelectTrigger id={field.key}>
                   <SelectValue placeholder="Selecione uma coluna" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhuma</SelectItem>
+                  <SelectItem value="none">Nenhuma</SelectItem>
                   {headers.map((header) => (
-                    <SelectItem key={header} value={header}>
-                      {header} (ex: {data[0]?.[header]})
+                    <SelectItem key={String(header)} value={String(header)}>
+                      {String(header)} (ex: {data[0]?.[header]})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -147,7 +160,11 @@ export function CsvMapping({ headers, data, onMapping, onBack }: CsvMappingProps
           <Button variant="outline" onClick={onBack}>
             Voltar
           </Button>
-          <Button onClick={() => onMapping(mapping)} disabled={!isValid} className="flex-1">
+          <Button
+            onClick={() => onMapping && onMapping(mapping)}
+            disabled={!isValid}
+            className="flex-1"
+          >
             Confirmar Mapeamento
           </Button>
         </div>

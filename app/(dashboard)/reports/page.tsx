@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Calendar, FileText, FileSpreadsheet } from "lucide-react"
 import { MonthlyReportView } from "@/components/reports/monthly-report-view"
 import { AnnualReportView } from "@/components/reports/annual-report-view"
@@ -112,101 +118,98 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Relatórios</h2>
-          <p className="text-muted-foreground">Análises detalhadas das suas finanças</p>
-        </div>
+    <div className="space-y-8 max-w-5xl mx-auto">
+      <div className="mb-2">
+        <h2 className="text-4xl font-bold tracking-tight mb-1">Relatório Executivo</h2>
+        <p className="text-lg text-muted-foreground max-w-2xl">
+          Uma visão estratégica e consultiva das suas finanças. Entenda rapidamente o que aconteceu,
+          o que mudou e o que isso significa para suas decisões.
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Período e Exportação
+            Período do Relatório
           </CardTitle>
-          <CardDescription>Selecione o período e formato para visualizar ou exportar</CardDescription>
+          <CardDescription>
+            Escolha o período para análise executiva e exporte para PDF ou Excel. Nenhuma edição é
+            permitida nesta tela.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-4">
+        <CardContent className="flex flex-wrap gap-4 items-end">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Tipo:</label>
+            <Select
+              value={reportType}
+              onValueChange={(value: "monthly" | "annual") => setReportType(value)}
+            >
+              <SelectTrigger className="w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Mensal</SelectItem>
+                <SelectItem value="annual">Anual</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {reportType === "monthly" && (
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Tipo:</label>
+              <label className="text-sm font-medium">Mês:</label>
               <Select
-                value={reportType}
-                onValueChange={(value: "monthly" | "annual") => setReportType(value)}
+                value={selectedMonth.toString()}
+                onValueChange={(value) => setSelectedMonth(parseInt(value))}
               >
-                <SelectTrigger className="w-[140px]">
+                <SelectTrigger className="w-[110px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="monthly">Mensal</SelectItem>
-                  <SelectItem value="annual">Anual</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {reportType === "monthly" && (
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Mês:</label>
-                <Select
-                  value={selectedMonth.toString()}
-                  onValueChange={(value) => setSelectedMonth(parseInt(value))}
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {months.map((m) => (
-                      <SelectItem key={m.value} value={m.value.toString()}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Ano:</label>
-              <Select
-                value={selectedYear.toString()}
-                onValueChange={(value) => setSelectedYear(parseInt(value))}
-              >
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {years.map((y) => (
-                    <SelectItem key={y} value={y.toString()}>
-                      {y}
+                  {months.map((m) => (
+                    <SelectItem key={m.value} value={m.value.toString()}>
+                      {m.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleExport("pdf")}
-              disabled={isExporting || !reportData}
+          )}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Ano:</label>
+            <Select
+              value={selectedYear.toString()}
+              onValueChange={(value) => setSelectedYear(parseInt(value))}
             >
-              <FileText className="mr-2 h-4 w-4" />
-              Exportar PDF
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleExport("excel")}
-              disabled={isExporting || !reportData}
-            >
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Exportar Excel
-            </Button>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((y) => (
+                  <SelectItem key={y} value={y.toString()}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("pdf")}
+            disabled={isExporting || !reportData}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Exportar PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleExport("excel")}
+            disabled={isExporting || !reportData}
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Exportar Excel
+          </Button>
         </CardContent>
       </Card>
 

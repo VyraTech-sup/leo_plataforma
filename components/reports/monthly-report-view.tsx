@@ -28,7 +28,14 @@ interface MonthlyReportViewProps {
   }
 }
 
-const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"]
+const COLORS = [
+  "hsl(var(--info))", // Azul institucional
+  "hsl(var(--secondary))", // Roxo institucional
+  "hsl(var(--destructive))", // Vermelho alerta
+  "hsl(var(--warning))", // Amarelo aviso
+  "hsl(var(--success))", // Verde sucesso
+  "hsl(var(--muted))", // Cinza institucional
+]
 
 export function MonthlyReportView({ data }: MonthlyReportViewProps) {
   const { period, summary, topCategories, insights } = data
@@ -84,7 +91,9 @@ export function MonthlyReportView({ data }: MonthlyReportViewProps) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${summary.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
+            <div
+              className={`text-2xl font-bold ${summary.cashFlow >= 0 ? "text-success" : "text-destructive"}`}
+            >
               {formatCurrency(summary.cashFlow)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -99,11 +108,17 @@ export function MonthlyReportView({ data }: MonthlyReportViewProps) {
             <Target className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${summary.savingsRate >= 20 ? "text-success" : summary.savingsRate > 0 ? "text-warning" : "text-destructive"}`}>
+            <div
+              className={`text-2xl font-bold ${summary.savingsRate >= 20 ? "text-success" : summary.savingsRate > 0 ? "text-warning" : "text-destructive"}`}
+            >
               {summary.savingsRate.toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {summary.savingsRate >= 20 ? "Excelente!" : summary.savingsRate > 0 ? "Razoável" : "Atenção"}
+              {summary.savingsRate >= 20
+                ? "Excelente!"
+                : summary.savingsRate > 0
+                  ? "Razoável"
+                  : "Atenção"}
             </p>
           </CardContent>
         </Card>
@@ -156,7 +171,7 @@ export function MonthlyReportView({ data }: MonthlyReportViewProps) {
                     labelLine={false}
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     outerRadius={80}
-                    fill="#8884d8"
+                    fill="hsl(var(--secondary))"
                     dataKey="value"
                   >
                     {chartData.map((_entry, index) => (

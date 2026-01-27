@@ -3,7 +3,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import { TrendingUp, Award, AlertTriangle, Target } from "lucide-react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  Legend,
+} from "recharts"
 
 interface AnnualReportViewProps {
   data: {
@@ -51,7 +62,15 @@ interface AnnualReportViewProps {
 }
 
 export function AnnualReportView({ data }: AnnualReportViewProps) {
-  const { period, summary, monthlyComparison, topCategories, bestMonth, worstMonth, goalsProgress } = data
+  const {
+    period,
+    summary,
+    monthlyComparison,
+    topCategories,
+    bestMonth,
+    worstMonth,
+    goalsProgress,
+  } = data
 
   const monthlyChartData = monthlyComparison.map((m) => ({
     month: m.month,
@@ -112,7 +131,9 @@ export function AnnualReportView({ data }: AnnualReportViewProps) {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${summary.totalCashFlow >= 0 ? "text-success" : "text-destructive"}`}>
+            <div
+              className={`text-2xl font-bold ${summary.totalCashFlow >= 0 ? "text-success" : "text-destructive"}`}
+            >
               {formatCurrency(summary.totalCashFlow)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -127,7 +148,9 @@ export function AnnualReportView({ data }: AnnualReportViewProps) {
             <TrendingUp className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${summary.netWorthGrowth >= 0 ? "text-success" : "text-destructive"}`}>
+            <div
+              className={`text-2xl font-bold ${summary.netWorthGrowth >= 0 ? "text-success" : "text-destructive"}`}
+            >
               {summary.netWorthGrowthPercentage >= 0 ? "+" : ""}
               {summary.netWorthGrowthPercentage.toFixed(1)}%
             </div>
@@ -163,8 +186,8 @@ export function AnnualReportView({ data }: AnnualReportViewProps) {
                 formatter={(value: number) => formatCurrency(value)}
               />
               <Legend />
-              <Bar dataKey="Receitas" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Despesas" fill="#ef4444" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Receitas" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Despesas" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
@@ -256,7 +279,9 @@ export function AnnualReportView({ data }: AnnualReportViewProps) {
                     </div>
                     <div>
                       <p className="font-medium">{cat.category}</p>
-                      <p className="text-xs text-muted-foreground">{cat.percentage.toFixed(1)}% do total</p>
+                      <p className="text-xs text-muted-foreground">
+                        {cat.percentage.toFixed(1)}% do total
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">

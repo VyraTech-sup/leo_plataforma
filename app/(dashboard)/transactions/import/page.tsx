@@ -10,25 +10,33 @@ import { CsvUpload } from "@/components/transactions/csv-upload"
 import { CsvPreview } from "@/components/transactions/csv-preview"
 import { CsvMapping } from "@/components/transactions/csv-mapping"
 
+// Função utilitária para aplicar o mapeamento do usuário aos dados do CSV
+function applyMapping(data: ParsedRow[], mapping: Record<string, string>) {
+  return data.map((row) => {
+    const mapped: any = {}
+    Object.entries(mapping).forEach(([field, csvCol]) => {
+      if (csvCol && row[csvCol] !== undefined) {
+        mapped[field] = row[csvCol]
+      }
+    })
+    return mapped
+  })
+}
+import { ReviewImport } from "@/components/transactions/review-import"
+
 interface ParsedRow {
   [key: string]: string
-}
-
-interface MappedTransaction {
-  type: "INCOME" | "EXPENSE" | "TRANSFER"
-  category: string
-  amount: number
-  description: string
-  date: string
-  accountId?: string
 }
 
 export default function ImportTransactionsPage() {
   const [csvData, setCsvData] = useState<ParsedRow[]>([])
   const [headers, setHeaders] = useState<string[]>([])
-  const [mapping, setMapping] = useState<Record<string, string>>({})
+
   const [isImporting, setIsImporting] = useState(false)
-  const [step, setStep] = useState<"upload" | "preview" | "mapping" | "confirm">("upload")
+  const [step, setStep] = useState<"upload" | "preview" | "mapping" | "review" | "confirm">(
+    "upload"
+  )
+  const [reviewData, setReviewData] = useState<any[]>([])
   const router = useRouter()
   const { toast } = useToast()
 
@@ -38,39 +46,31 @@ export default function ImportTransactionsPage() {
     setStep("preview")
   }
 
-  const handleMapping = (newMapping: Record<string, string>) => {
-    setMapping(newMapping)
+  const handleReviewConfirm = (data: any[]) => {
+    setReviewData(data)
     setStep("confirm")
   }
 
   const handleImport = async () => {
     setIsImporting(true)
     try {
-      const mappedTransactions: MappedTransaction[] = csvData.map((row) => ({
-        type: (mapping.type ? row[mapping.type] : "EXPENSE") as "INCOME" | "EXPENSE" | "TRANSFER",
-        category: mapping.category ? row[mapping.category] || "Outros" : "Outros",
-        amount: mapping.amount ? parseFloat(row[mapping.amount] || "0") : 0,
-        description: mapping.description ? row[mapping.description] || "Sem descrição" : "Sem descrição",
-        date: mapping.date ? row[mapping.date] || new Date().toISOString() : new Date().toISOString(),
-        accountId: mapping.accountId && row[mapping.accountId] ? row[mapping.accountId] : undefined,
+      // Remove id temporário antes de enviar
+      const mappedTransactions = reviewData.map(({ id, ...rest }) => ({
+        ...rest,
+        amount: parseFloat(rest.amount || "0"),
       }))
-
       const response = await fetch("/api/transactions/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transactions: mappedTransactions }),
       })
-
       if (response.ok) {
         const result = await response.json()
         toast({
           title: "Importação concluída!",
           description: `${result.results.success} transações importadas com sucesso. ${result.results.failed} falharam.`,
         })
-        
-        // Disparar evento para atualizar o dashboard
-        window.dispatchEvent(new CustomEvent('transaction-updated'))
-        
+        window.dispatchEvent(new CustomEvent("transaction-updated"))
         router.push("/transactions")
       } else {
         throw new Error()
@@ -95,9 +95,7 @@ export default function ImportTransactionsPage() {
         </Button>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Importar Transações</h1>
-          <p className="text-muted-foreground">
-            Importe suas transações de um arquivo CSV
-          </p>
+          <p className="text-muted-foreground">Importe suas transações de um arquivo CSV</p>
         </div>
       </div>
 
@@ -109,9 +107,7 @@ export default function ImportTransactionsPage() {
         >
           1
         </div>
-        <span className={step === "upload" ? "font-medium" : "text-muted-foreground"}>
-          Upload
-        </span>
+        <span className={step === "upload" ? "font-medium" : "text-muted-foreground"}>Upload</span>
         <div className="h-px w-12 bg-border" />
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full ${
@@ -126,12 +122,18 @@ export default function ImportTransactionsPage() {
         <div className="h-px w-12 bg-border" />
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full ${
-            step === "mapping" || step === "confirm" ? "bg-primary text-primary-foreground" : "bg-muted"
+            step === "mapping" || step === "confirm"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted"
           }`}
         >
           3
         </div>
-        <span className={step === "mapping" || step === "confirm" ? "font-medium" : "text-muted-foreground"}>
+        <span
+          className={
+            step === "mapping" || step === "confirm" ? "font-medium" : "text-muted-foreground"
+          }
+        >
           Mapeamento
         </span>
         <div className="h-px w-12 bg-border" />
@@ -161,8 +163,19 @@ export default function ImportTransactionsPage() {
         <CsvMapping
           headers={headers}
           data={csvData}
-          onMapping={handleMapping}
           onBack={() => setStep("preview")}
+          onMapping={(mapping) => {
+            setReviewData(applyMapping(csvData, mapping))
+            setStep("review")
+          }}
+        />
+      )}
+
+      {step === "review" && (
+        <ReviewImport
+          transactions={reviewData}
+          onConfirm={handleReviewConfirm}
+          onBack={() => setStep("mapping")}
         />
       )}
 
@@ -174,44 +187,15 @@ export default function ImportTransactionsPage() {
               Confirmar Importação
             </CardTitle>
             <CardDescription>
-              Revise o mapeamento e confirme a importação
+              Revise e confirme a importação das transações editadas
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg bg-muted p-4">
-              <h3 className="mb-2 font-semibold">Mapeamento de Colunas</h3>
-              <div className="space-y-1 text-sm">
-                <p>
-                  <span className="font-medium">Tipo:</span> {mapping.type}
-                </p>
-                <p>
-                  <span className="font-medium">Categoria:</span> {mapping.category}
-                </p>
-                <p>
-                  <span className="font-medium">Valor:</span> {mapping.amount}
-                </p>
-                <p>
-                  <span className="font-medium">Descrição:</span> {mapping.description}
-                </p>
-                <p>
-                  <span className="font-medium">Data:</span> {mapping.date}
-                </p>
-                {mapping.accountId && (
-                  <p>
-                    <span className="font-medium">Conta:</span> {mapping.accountId}
-                  </p>
-                )}
-              </div>
-            </div>
-
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-              <p className="text-sm font-medium">
-                {csvData.length} transações serão importadas
-              </p>
+              <p className="text-sm font-medium">{reviewData.length} transações serão importadas</p>
             </div>
-
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep("mapping")}>
+              <Button variant="outline" onClick={() => setStep("review")}>
                 Voltar
               </Button>
               <Button onClick={handleImport} disabled={isImporting} className="flex-1">
@@ -220,7 +204,7 @@ export default function ImportTransactionsPage() {
                 ) : (
                   <>
                     <Upload className="mr-2 h-4 w-4" />
-                    Importar {csvData.length} Transações
+                    Importar {reviewData.length} Transações
                   </>
                 )}
               </Button>

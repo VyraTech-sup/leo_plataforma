@@ -17,10 +17,7 @@ const transactionUpdateSchema = z.object({
   tags: z.array(z.string()).optional(),
 })
 
-export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -39,16 +36,17 @@ export async function GET(
       return NextResponse.json({ error: "Transação não encontrada" }, { status: 404 })
     }
 
+    // Notificar frontend para atualizar dashboard
+    if (typeof globalThis !== "undefined" && globalThis.dispatchEvent) {
+      globalThis.dispatchEvent(new Event("transaction-updated"))
+    }
     return NextResponse.json(transaction)
   } catch (error) {
     return NextResponse.json({ error: "Erro ao buscar transação" }, { status: 500 })
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -99,7 +97,8 @@ export async function PATCH(
     })
 
     // Aplicar novo saldo se houver conta
-    const newAccountId = data.accountId !== undefined ? data.accountId : originalTransaction.accountId
+    const newAccountId =
+      data.accountId !== undefined ? data.accountId : originalTransaction.accountId
     if (newAccountId) {
       const newAmount = data.amount ?? Number(originalTransaction.amount)
       const newType = data.type ?? originalTransaction.type
@@ -125,10 +124,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
@@ -162,6 +158,10 @@ export async function DELETE(
       where: { id: params.id },
     })
 
+    // Notificar frontend para atualizar dashboard
+    if (typeof globalThis !== "undefined" && globalThis.dispatchEvent) {
+      globalThis.dispatchEvent(new Event("transaction-updated"))
+    }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting transaction:", error)

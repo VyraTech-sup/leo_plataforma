@@ -3,6 +3,14 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useTooltipContext } from "@/components/tooltip-context"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 import {
   LayoutDashboard,
   Wallet,
@@ -29,6 +37,7 @@ const navigation = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { enabled, setEnabled, reset } = useTooltipContext()
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
@@ -58,6 +67,29 @@ export function Sidebar() {
           )
         })}
       </nav>
+      <div className="p-4 border-t mt-auto">
+        <div className="flex flex-col gap-2">
+          <Button
+            variant={enabled ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setEnabled(!enabled)}
+            className="w-full"
+          >
+            {enabled ? "Desativar dicas" : "Ativar dicas"}
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-full">
+                Ver ajuda
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={reset}>Reativar todas as dicas</DropdownMenuItem>
+              {/* Outras áreas podem ser listadas aqui futuramente */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
     </div>
   )
 }

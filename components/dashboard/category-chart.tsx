@@ -14,12 +14,12 @@ interface CategoryChartProps {
 }
 
 const COLORS = [
-  'hsl(174, 62%, 47%)',
-  'hsl(38, 92%, 50%)',
-  'hsl(0, 84%, 60%)',
-  'hsl(142, 71%, 45%)',
-  'hsl(210, 40%, 56%)',
-  'hsl(280, 60%, 60%)',
+  "hsl(var(--success))", // Verde institucional
+  "hsl(var(--warning))", // Amarelo institucional
+  "hsl(var(--destructive))", // Vermelho institucional
+  "hsl(var(--secondary))", // Roxo institucional
+  "hsl(var(--info))", // Azul institucional
+  "hsl(var(--muted))", // Cinza institucional
 ]
 
 export function CategoryChart({ data }: CategoryChartProps) {
@@ -27,30 +27,34 @@ export function CategoryChart({ data }: CategoryChartProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Gastos por Categoria</CardTitle>
-          <CardDescription>Distribuição do mês</CardDescription>
+          <CardTitle>Distribuição de Gastos por Categoria</CardTitle>
+          <CardDescription>
+            Visualize onde estão concentrados seus principais gastos e identifique oportunidades de
+            ajuste.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex h-[300px] items-center justify-center text-muted-foreground">
-            Sem despesas neste mês
+            Nenhuma despesa registrada neste mês.
           </div>
         </CardContent>
       </Card>
     )
   }
 
-  const chartData = data
-    .slice(0, 6)
-    .map((item) => ({
-      name: item.category,
-      value: Math.abs(item.total),
-    }))
+  const chartData = data.slice(0, 6).map((item) => ({
+    name: item.category,
+    value: Math.abs(item.total),
+  }))
 
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
-        <CardTitle>Gastos por Categoria</CardTitle>
-        <CardDescription>Distribuição de despesas por categoria</CardDescription>
+        <CardTitle>Distribuição de Gastos por Categoria</CardTitle>
+        <CardDescription>
+          Visualize onde estão concentrados seus principais gastos e identifique oportunidades de
+          ajuste.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -71,9 +75,9 @@ export function CategoryChart({ data }: CategoryChartProps) {
             </Pie>
             <Tooltip
               contentStyle={{
-                backgroundColor: 'hsl(var(--card))',
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '8px',
+                backgroundColor: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "8px",
               }}
               formatter={(value: number) => formatCurrency(value)}
             />

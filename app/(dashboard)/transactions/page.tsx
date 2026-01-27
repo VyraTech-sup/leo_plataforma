@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { TransactionsTable } from "@/components/transactions/transactions-table"
+import TransactionsTable from "@/components/transactions/transactions-table"
 import { TransactionFilters } from "@/components/transactions/transaction-filters"
 import { Button } from "@/components/ui/button"
 import { Plus, Upload, Receipt } from "lucide-react"
@@ -27,9 +27,9 @@ interface Transaction {
   amount: string
   description: string
   date: string
-  isPending: boolean
-  account: { name: string; institution: string } | null
-  card: { name: string; brand: string } | null
+  isPending?: boolean
+  account: { name: string } | null
+  card?: { name: string; brand: string } | null
 }
 
 interface Pagination {
@@ -53,6 +53,10 @@ export default function TransactionsPage() {
   const [filters, setFilters] = useState({
     search: "",
     category: "",
+    subcategory: "",
+    paymentMethod: "",
+    competenceMonth: "",
+    status: "",
     accountId: "",
     type: "",
     startDate: "",

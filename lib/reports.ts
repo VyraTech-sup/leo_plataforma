@@ -158,10 +158,9 @@ export async function generateMonthlyReport(
     dailyMap.set(day, current)
   })
 
-  let runningBalance =
-    previousBalance.reduce((sum: number, t: any) => {
-      return sum + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount))
-    }, 0)
+  let runningBalance = previousBalance.reduce((sum: number, t: any) => {
+    return sum + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount))
+  }, 0)
 
   const dailyEvolution = Array.from(dailyMap.entries())
     .map(([date, data]) => {
@@ -178,9 +177,13 @@ export async function generateMonthlyReport(
   // Insights simples
   const insights: string[] = []
   if (savingsRate > 20) {
-    insights.push(`Excelente! Taxa de poupança de ${savingsRate.toFixed(1)}%`)
+    insights.push(
+      `Você está no ritmo certo para atingir seus objetivos. Sua taxa de poupança foi de ${savingsRate.toFixed(1)}% neste período.`
+    )
   } else if (savingsRate < 0) {
-    insights.push(`Atenção: déficit de R$ ${Math.abs(cashFlow).toFixed(2)}`)
+    insights.push(
+      `Vale revisar este ponto para manter o planejamento em dia. Houve déficit de R$ ${Math.abs(cashFlow).toFixed(2)} neste período.`
+    )
   }
   if (topCategories.length > 0 && topCategories[0]) {
     insights.push(
@@ -208,10 +211,7 @@ export async function generateMonthlyReport(
   }
 }
 
-export async function generateAnnualReport(
-  userId: string,
-  year: number
-): Promise<AnnualReport> {
+export async function generateAnnualReport(userId: string, year: number): Promise<AnnualReport> {
   const periodStart = startOfYear(new Date(year, 0))
   const periodEnd = endOfYear(new Date(year, 0))
 
@@ -267,8 +267,7 @@ export async function generateAnnualReport(
     .reduce((sum: number, acc: any) => sum + Number(acc.balance), 0)
 
   const netWorthGrowth = netWorthEnd - netWorthStart
-  const netWorthGrowthPercentage =
-    netWorthStart > 0 ? (netWorthGrowth / netWorthStart) * 100 : 0
+  const netWorthGrowthPercentage = netWorthStart > 0 ? (netWorthGrowth / netWorthStart) * 100 : 0
 
   // Comparação mensal
   const monthlyMap = new Map<number, { income: number; expense: number }>()

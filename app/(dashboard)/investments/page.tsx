@@ -1,4 +1,6 @@
 "use client"
+import { InvestmentDrilldown } from "@/components/investments/investment-drilldown"
+import { AportRetiradaDialog } from "@/components/investments/aport-retirada-dialog"
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -76,6 +78,26 @@ const investmentTypes = {
 
 export default function InvestmentsPage() {
   const [investments, setInvestments] = useState<Investment[]>([])
+  const [drilldownOpen, setDrilldownOpen] = useState(false)
+  const [drilldownInvestment, setDrilldownInvestment] = useState<Investment | null>(null)
+  const [movements, setMovements] = useState<any[]>([])
+
+  const handleOpenDrilldown = async (investment: Investment) => {
+    setDrilldownInvestment(investment)
+    setDrilldownOpen(true)
+    // Opcional: buscar movimentos do investimento se necessário
+    try {
+      const res = await fetch(`/api/investments/${investment.id}/movements`)
+      if (res.ok) {
+        const data = await res.json()
+        setMovements(data)
+      } else {
+        setMovements([])
+      }
+    } catch {
+      setMovements([])
+    }
+  }
   const [isOpen, setIsOpen] = useState(false)
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null)
   const { toast } = useToast()
@@ -408,8 +430,57 @@ export default function InvestmentsPage() {
           )
           const typeInfo = investmentTypes[investment.type as keyof typeof investmentTypes]
 
+          // Função para registrar aporte/retirada
+          const handleAportRetirada = async (amount: number, type: "APORTE" | "RETIRADA") => {
+            try {
+              const response = await fetch("/api/investments/api/aport-retirada", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  investmentId: investment.id,
+                  amount,
+                  type,
+                }),
+              })
+              if (response.ok) {
+                fetchInvestments()
+              }
+            } catch (e) {}
+          }
+
           return (
-            <Card key={investment.id}>
+            <Card
+              key={investment.id}
+              onClick={() => handleOpenDrilldown(investment)}
+              style={{ cursor: "pointer" }}
+            >
+              {drilldownOpen && drilldownInvestment && (
+                <Dialog open={drilldownOpen} onOpenChange={setDrilldownOpen}>
+                  <DialogContent className="max-w-2xl">
+                    <InvestmentDrilldown
+                      investment={{
+                        ...drilldownInvestment,
+                        amount: parseFloat(drilldownInvestment.amount),
+                        currentValue: parseFloat(drilldownInvestment.currentValue),
+                        profitability: drilldownInvestment.profitability
+                          ? parseFloat(drilldownInvestment.profitability)
+                          : 0,
+                        profit:
+                          parseFloat(drilldownInvestment.currentValue) -
+                          parseFloat(drilldownInvestment.amount),
+                        history: movements.map((m) => ({
+                          date: m.date.split("T")[0],
+                          value: m.amount,
+                          aportes: m.type === "APORTE" ? m.amount : undefined,
+                          retiradas: m.type === "RETIRADA" ? Math.abs(m.amount) : undefined,
+                        })),
+                        dividends: [], // Integrar dividendos reais se disponível
+                      }}
+                      onClose={() => setDrilldownOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
@@ -489,6 +560,7 @@ export default function InvestmentsPage() {
                     <Trash2 className="h-3 w-3 mr-1" />
                     Excluir
                   </Button>
+                  <AportRetiradaDialog onSubmit={handleAportRetirada} />
                 </div>
               </CardContent>
             </Card>
