@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { listPluggyConnectors } from "@/lib/pluggy"
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
     const connectors = await listPluggyConnectors()
     return NextResponse.json(connectors)
