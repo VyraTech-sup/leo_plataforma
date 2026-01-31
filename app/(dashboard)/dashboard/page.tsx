@@ -5,13 +5,12 @@ import DashboardStats from "@/components/dashboard/stats"
 import { GoalsProgress } from "@/components/dashboard/goals-progress"
 import { GoalsStatusBlock } from "@/components/dashboard/goals-status-block"
 import { FinancialSimulationBlock } from "@/components/dashboard/financial-simulation-block"
-import { TooltipProgressiva } from "@/components/tooltip-progressiva"
 import { CategoryBudgetBlock } from "@/components/dashboard/category-budget-block"
 
 import { ResultBarChart } from "@/components/dashboard/result-bar-chart"
 import { MonthSelector } from "@/components/dashboard/month-selector"
 import { DashboardSkeleton } from "@/components/ui/loading-skeletons"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertCircle } from "lucide-react"
 import dynamic from "next/dynamic"
@@ -77,6 +76,17 @@ interface DashboardData {
     card: { name: string; brand: string } | null
   }>
   insights: string[]
+  goals?: Array<{
+    id: string
+    name: string
+    targetAmount: number
+    currentAmount: number
+    progress?: number
+    status?: string
+    dueDate?: string
+    priority: string
+    canReach?: boolean
+  }>
 }
 
 export default function DashboardPage() {
@@ -204,91 +214,124 @@ export default function DashboardPage() {
   const handleYearView = () => setIsYearView((v) => !v)
 
   return (
-    <div className="space-y-6">
-      {showOnboarding && <OnboardingTour onClose={handleCloseOnboarding} />}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-        <div>
-          <TooltipProgressiva
-            id="dashboard"
-            text="Aqui você acompanha saldo, evolução e movimentos. Use os gráficos para identificar tendências."
-            cta="Entendi"
-          >
-            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          </TooltipProgressiva>
-          <p className="text-muted-foreground">Visão geral do seu patrimônio e movimentações</p>
+    <div className="grid grid-cols-12 gap-6">
+      {/* Lateral de filtros e contas (exemplo, pode ser expandido) */}
+      <div className="col-span-12 md:col-span-3 lg:col-span-2 space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Filtros</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <MonthSelector
+              month={getMonthName(selectedMonth)}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onYearView={handleYearView}
+              isYearView={isYearView}
+            />
+            {/* Adicione aqui outros filtros, contas, seleção de período, etc. */}
+          </CardContent>
+        </Card>
+      </div>
+      {/* Área principal do dashboard */}
+      <div className="col-span-12 md:col-span-9 lg:col-span-10 space-y-6">
+        {/* TOPO — CONTEXTO GERAL */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">Olá, João!</h1>
+            <p className="text-base text-muted-foreground mb-2">
+              Visão geral do seu cenário financeiro atual e do impacto futuro das suas decisões.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <MonthSelector
+              month={getMonthName(selectedMonth)}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onYearView={handleYearView}
+              isYearView={isYearView}
+            />
+          </div>
         </div>
-        <MonthSelector
-          month={getMonthName(selectedMonth)}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onYearView={handleYearView}
-          isYearView={isYearView}
-        />
+        {/* Linha de KPIs (cards de topo) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <DashboardStats
+            netWorth={data.metrics.netWorth}
+            monthIncome={data.metrics.monthIncome}
+            monthExpense={data.metrics.monthExpense}
+            cashFlow={data.metrics.cashFlow}
+            goalValue={
+              data.goals?.[0]?.targetAmount ? Number(data.goals[0].targetAmount) : undefined
+            }
+            projectionValue={data.metrics.netWorth + data.metrics.savingsRate * 12}
+            progressPercent={data.goals?.[0]?.progress}
+            status={
+              data.goals?.[0]?.status === "ACTIVE"
+                ? "ok"
+                : data.goals?.[0]?.status === "PAUSED"
+                  ? "risco"
+                  : "atrasado"
+            }
+          />
+        </div>
+        {/* Linha de gráficos principais */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <NetWorthChart data={data.monthlyData} />
+          <ResultBarChart
+            data={data.monthlyData.map((item) => ({
+              month: item.month,
+              income: item.income,
+              expense: item.expense,
+              result: item.income - Math.abs(item.expense),
+              transactions: data.recentTransactions
+                .filter((t) => t.date.startsWith(item.month))
+                .map((t) => ({
+                  id: t.id,
+                  amount: Number(t.amount),
+                  description: t.description,
+                  date: t.date,
+                  category: t.category,
+                })),
+            }))}
+          />
+        </div>
+        {/* Linha de blocos analíticos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CategoryChart data={data.categories} />
+          <InsightCard insights={data.insights} />
+        </div>
+        {/* Linha de orçamento por categoria e transações recentes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CategoryBudgetBlock
+            categories={data.categories.map((cat) => ({
+              category: cat.category,
+              budget: 0,
+              spent: cat.total ?? 0,
+            }))}
+          />
+          <RecentTransactions transactions={data.recentTransactions} />
+        </div>
+        {/* Metas e status das metas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GoalsProgress
+            goals={(data.goals || []).map((goal) => ({
+              ...goal,
+              targetAmount: Number(goal.targetAmount) || 0,
+              currentAmount: Number(goal.currentAmount) || 0,
+              priority: goal.priority || "Normal",
+            }))}
+          />
+          <GoalsStatusBlock
+            goals={(data.goals || []).map((goal) => ({
+              ...goal,
+              targetAmount: Number(goal.targetAmount) || 0,
+              currentAmount: Number(goal.currentAmount) || 0,
+              priority: goal.priority || "Normal",
+            }))}
+          />
+        </div>
+        <FinancialSimulationBlock onSimulate={() => {}} />
       </div>
-
-      {/* Cards de topo: Central de decisão financeira */}
-      <DashboardStats
-        netWorth={data.metrics.netWorth}
-        monthIncome={data.metrics.monthIncome}
-        monthExpense={data.metrics.monthExpense}
-        cashFlow={data.metrics.cashFlow}
-        goalValue={data.goals?.[0]?.targetAmount ? Number(data.goals[0].targetAmount) : undefined}
-        projectionValue={data.metrics.netWorth + data.metrics.savingsRate * 12}
-        progressPercent={data.goals?.[0]?.progress}
-        status={
-          data.goals?.[0]?.status === "ACTIVE"
-            ? "ok"
-            : data.goals?.[0]?.status === "PAUSED"
-              ? "risco"
-              : "atrasado"
-        }
-      />
-
-      {/* Bloco de Simulação Financeira */}
-      <FinancialSimulationBlock onSimulate={() => {}} />
-
-      {/* Gráfico de evolução patrimonial com três linhas (real, conservadora, otimista) */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <NetWorthChart data={data.monthlyData} />
-        <ResultBarChart
-          data={data.monthlyData.map((item) => ({
-            month: item.month,
-            income: item.income,
-            expense: item.expense,
-            result: item.income - Math.abs(item.expense),
-            transactions: data.recentTransactions
-              .filter((t) => t.date.startsWith(item.month))
-              .map((t) => ({
-                id: t.id,
-                amount: Number(t.amount),
-                description: t.description,
-                date: t.date,
-                category: t.category,
-              })),
-          }))}
-        />
-      </div>
-
-      {/* Metas ativas integradas ao dashboard */}
-      <GoalsProgress goals={data.goals || []} />
-      <GoalsStatusBlock goals={data.goals || []} />
-
-      {/* Orçamento por categoria */}
-      <CategoryBudgetBlock
-        categories={data.categories.map((cat) => ({
-          category: cat.category,
-          budget: cat.budget ?? 0,
-          spent: cat.total ?? 0,
-        }))}
-      />
-
-      {/* Insights acionáveis */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <CategoryChart data={data.categories} />
-        <InsightCard insights={data.insights} />
-      </div>
-
-      <RecentTransactions transactions={data.recentTransactions} />
     </div>
   )
 }

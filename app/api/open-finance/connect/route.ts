@@ -14,7 +14,8 @@ export async function POST(_: NextRequest) {
   try {
     // 1. Autenticação
     const session = await getServerSession(authOptions)
-    if (!session?.user?.email) {
+    console.log("[OPEN FINANCE CONNECT] Sessão recebida:", session)
+    if (!session || !session.user || !session.user.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

@@ -324,7 +324,7 @@ function ConnectionStatusBadge({ status }: { status: string }) {
   )
 }
 
-// Função auxiliar para carregar SDK do Pluggy
+// Função auxiliar para carregar SDK do Pluggy (URL correta, carregamento único)
 function loadPluggySDK(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window !== "undefined" && (window as any).PluggyConnect) {
@@ -332,8 +332,21 @@ function loadPluggySDK(): Promise<void> {
       return
     }
 
+    // Evitar múltiplos scripts
+    if (document.getElementById("pluggy-connect-sdk")) {
+      // Se já existe, aguardar carregamento
+      const check = setInterval(() => {
+        if ((window as any).PluggyConnect) {
+          clearInterval(check)
+          resolve()
+        }
+      }, 50)
+      return
+    }
+
     const script = document.createElement("script")
-    script.src = "https://cdn.pluggy.ai/pluggy-connect/v2/pluggy-connect.js"
+    script.id = "pluggy-connect-sdk"
+    script.src = "https://cdn.pluggy.ai/pluggy-connect/pluggy-connect.js"
     script.async = true
     script.onload = () => resolve()
     script.onerror = () => reject(new Error("Failed to load Pluggy SDK"))

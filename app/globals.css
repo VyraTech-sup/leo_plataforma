@@ -177,6 +177,48 @@
     font-weight: 400;
     letter-spacing: 0.01em;
     line-height: 1.6;
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+
+  /* Forçar modo escuro para todo o app */
+  html,
+  body,
+  #__next,
+  #root {
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+
+  /* Bordas e linhas delicadas em verde LMG */
+  .border,
+  .divide-y > :not([hidden]) ~ :not([hidden]),
+  .ring-1,
+  .ring-2,
+  .ring,
+  .border-border {
+    border-color: #10b981 !important;
+  }
+  .ring-primary,
+  .ring-success,
+  .border-primary,
+  .border-success {
+    --tw-ring-color: #10b981 !important;
+    border-color: #10b981 !important;
+  }
+  /* Cards e containers com fundo escuro */
+  .bg-white,
+  .bg-background,
+  .bg-card,
+  .bg-popover {
+    background-color: #111 !important;
+  }
+  /* Textos sempre brancos */
+  .text-foreground,
+  .text-white,
+  .text-card-foreground,
+  .text-popover-foreground {
+    color: #fff !important;
   }
 
   h1 {

@@ -29,7 +29,7 @@ export async function PATCH(request: NextRequest) {
       // Replicar para todos os meses futuros (incluindo o atual)
       const now = new Date()
       const [year, m] = month.split("-").map(Number)
-      if (!Number.isFinite(year)Number.isFinite(m)) {
+      if (!Number.isFinite(year) || !Number.isFinite(m)) {
         return NextResponse.json({ error: "Mês inválido" }, { status: 400 })
       }
       const y = year as number

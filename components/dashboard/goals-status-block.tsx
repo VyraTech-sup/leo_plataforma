@@ -6,9 +6,10 @@ interface GoalStatus {
   name: string
   targetAmount: number
   currentAmount: number
-  dueDate: string
-  status: "no ritmo" | "atrasada" | "adiantada"
-  canReach: boolean
+  dueDate?: string
+  status?: string
+  canReach?: boolean
+  priority?: string
 }
 
 interface GoalsStatusBlockProps {
