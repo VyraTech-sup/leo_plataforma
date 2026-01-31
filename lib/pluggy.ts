@@ -8,10 +8,7 @@
 import axios, { AxiosInstance } from "axios"
 import crypto from "crypto"
 
-const PLUGGY_BASE_URL = "https://api.pluggy.ai"
-const PLUGGY_CLIENT_ID = process.env.PLUGGY_CLIENT_ID!
-const PLUGGY_CLIENT_SECRET = process.env.PLUGGY_CLIENT_SECRET!
-
+// Arquivo removido conforme solicitado. Open Finance será refeito do zero.
 let cachedToken: string | null = null
 let tokenExpiresAt: number | null = null
 let axiosInstance: AxiosInstance | null = null
