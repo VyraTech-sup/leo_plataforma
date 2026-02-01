@@ -1,82 +1,81 @@
-// Card de resumo de cartões do dashboard LMG
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
-import { LucideCreditCard, Flag } from "lucide-react"
+import { CreditCard } from "lucide-react"
 
-export interface CardSummary {
+interface CardData {
   id: string
-  brand: "Visa" | "Mastercard" | "Elo" | "Amex" | "Outros"
+  name: string
   limit: number
-  invoice: number
-  points: number
-  installments: number
-  paidPercent: number
+  currentBalance: number
 }
 
-export interface CardsSummaryProps {
-  cards: CardSummary[]
-}
-
-function getBrandIcon(brand: string) {
-  switch (brand) {
-    case "Elo":
-      return <Flag className="text-yellow-400" size={24} />
-    case "Amex":
-      return <Flag className="text-green-400" size={24} />
-    default:
-      return <LucideCreditCard className="text-teal-400" size={24} />
-  }
+interface CardsSummaryProps {
+  cards: CardData[]
 }
 
 export function CardsSummary({ cards }: CardsSummaryProps) {
+  const defaultCards = [
+    { id: "1", name: "Nubank", limit: 5000, currentBalance: 2300 },
+    { id: "2", name: "Inter", limit: 3000, currentBalance: 800 },
+  ]
+
+  const displayCards = cards.length > 0 ? cards : defaultCards
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      minimumFractionDigits: 0,
+    }).format(value)
+  }
+
+  const getCardColor = (name: string) => {
+    const colors: Record<string, string> = {
+      Nubank: "bg-purple-600",
+      Inter: "bg-orange-500",
+      default: "bg-gray-700",
+    }
+    return colors[name] || colors.default
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {cards.map((card) => {
-        const usedPercent = card.limit > 0 ? (card.invoice / card.limit) * 100 : 0
-        return (
-          <Card key={card.id} className="bg-dark border-2 border-teal-500 text-white">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                {getBrandIcon(card.brand)} {card.brand}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between text-sm">
-                  <span>Limite:</span>
-                  <span className="font-bold">
-                    {card.limit.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+    <Card className="bg-[#18181b] border-2 border-teal-500 rounded-lg shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-white">Cartões</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {displayCards.slice(0, 2).map((card) => {
+          const percentage = Math.round((card.currentBalance / card.limit) * 100)
+          const cardColor = getCardColor(card.name)
+
+          return (
+            <div key={card.id} className={`p-4 rounded-lg ${cardColor} border border-gray-700`}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-white" />
+                  <span className="font-bold text-white">{card.name}</span>
+                </div>
+                <span className="text-sm text-white font-medium">{percentage}%</span>
+              </div>
+              <div className="space-y-1 mb-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-200">Limite</span>
+                  <span className="text-white font-medium">{formatCurrency(card.limit)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-200">Fatura</span>
+                  <span className="text-white font-medium">
+                    {formatCurrency(card.currentBalance)}
                   </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Fatura:</span>
-                  <span className="font-bold">
-                    {card.invoice.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Pontos/Fidelidade:</span>
-                  <span className="font-bold">{card.points}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Compras Parceladas:</span>
-                  <span className="font-bold">{card.installments}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Pago vs a Pagar:</span>
-                  <span className="font-bold">{card.paidPercent.toFixed(1)}%</span>
-                </div>
-                <div className="mt-2">
-                  <Progress value={usedPercent} className="h-2" />
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Utilização do limite: {usedPercent.toFixed(1)}%
-                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )
-      })}
-    </div>
+              <Progress value={percentage} className="h-2 bg-gray-800" />
+            </div>
+          )
+        })}
+      </CardContent>
+    </Card>
   )
 }

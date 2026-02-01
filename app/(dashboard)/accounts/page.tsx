@@ -1,12 +1,24 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { formatCurrency } from "@/lib/utils"
 import { Plus, Wallet, Edit, Trash2 } from "lucide-react"
@@ -16,7 +28,10 @@ import { z } from "zod"
 import dynamic from "next/dynamic"
 
 const ConnectBankDialog = dynamic(
-  () => import("@/components/accounts/connect-bank-dialog").then(mod => ({ default: mod.ConnectBankDialog })),
+  () =>
+    import("@/components/accounts/connect-bank-dialog").then((mod) => ({
+      default: mod.ConnectBankDialog,
+    })),
   { ssr: false }
 )
 
@@ -67,11 +82,7 @@ export default function AccountsPage() {
 
   const selectedType = watch("type")
 
-  useEffect(() => {
-    fetchAccounts()
-  }, [])
-
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
       const response = await fetch("/api/accounts")
       if (response.ok) {
@@ -85,7 +96,10 @@ export default function AccountsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [toast])
+  useEffect(() => {
+    fetchAccounts()
+  }, [fetchAccounts])
 
   const onSubmit = async (data: AccountFormData) => {
     try {
@@ -166,8 +180,8 @@ export default function AccountsPage() {
         </div>
         <div className="flex gap-2">
           <ConnectBankDialog />
-          <Dialog 
-            open={isOpen} 
+          <Dialog
+            open={isOpen}
             onOpenChange={(open) => {
               setIsOpen(open)
               if (!open) {
@@ -195,13 +209,18 @@ export default function AccountsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="type">Tipo</Label>
-                  <Select value={selectedType} onValueChange={(value) => setValue("type", value as AccountFormData["type"])}>
+                  <Select
+                    value={selectedType}
+                    onValueChange={(value) => setValue("type", value as AccountFormData["type"])}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(accountTypes).map(([key, value]) => (
-                        <SelectItem key={key} value={key}>{value}</SelectItem>
+                        <SelectItem key={key} value={key}>
+                          {value}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -211,13 +230,23 @@ export default function AccountsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="institution">Instituição</Label>
                   <Input id="institution" {...register("institution")} placeholder="Ex: Nubank" />
-                  {errors.institution && <p className="text-sm text-destructive">{errors.institution.message}</p>}
+                  {errors.institution && (
+                    <p className="text-sm text-destructive">{errors.institution.message}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="balance">Saldo Atual</Label>
-                  <Input id="balance" type="number" step="0.01" {...register("balance")} placeholder="0.00" />
-                  {errors.balance && <p className="text-sm text-destructive">{errors.balance.message}</p>}
+                  <Input
+                    id="balance"
+                    type="number"
+                    step="0.01"
+                    {...register("balance")}
+                    placeholder="0.00"
+                  />
+                  {errors.balance && (
+                    <p className="text-sm text-destructive">{errors.balance.message}</p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full">
@@ -247,7 +276,9 @@ export default function AccountsPage() {
               <Wallet className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(parseFloat(account.balance))}</div>
+              <div className="text-2xl font-bold">
+                {formatCurrency(parseFloat(account.balance))}
+              </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {accountTypes[account.type as keyof typeof accountTypes]} • {account.institution}
               </p>

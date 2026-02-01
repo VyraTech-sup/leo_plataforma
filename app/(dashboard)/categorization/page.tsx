@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,11 +31,7 @@ export default function CategorizationPage() {
   const [newCategory, setNewCategory] = useState("")
   const { toast } = useToast()
 
-  useEffect(() => {
-    fetchRules()
-  }, [])
-
-  const fetchRules = async () => {
+  const fetchRules = useCallback(async () => {
     try {
       const response = await fetch("/api/categorization/rules")
       if (response.ok) {
@@ -51,7 +47,10 @@ export default function CategorizationPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [toast])
+  useEffect(() => {
+    fetchRules()
+  }, [fetchRules])
 
   const handleCreateRule = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -130,9 +129,7 @@ export default function CategorizationPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Categorização Inteligente</h1>
-        <p className="text-muted-foreground">
-          Gerencie as regras de categorização automática
-        </p>
+        <p className="text-muted-foreground">Gerencie as regras de categorização automática</p>
       </div>
 
       <Card>
@@ -142,16 +139,16 @@ export default function CategorizationPage() {
             Como Funciona
           </CardTitle>
           <CardDescription>
-            O sistema aprende automaticamente quando você categoriza transações. Quando a
-            descrição de uma transação contém um padrão conhecido, a categoria é sugerida
-            automaticamente.
+            O sistema aprende automaticamente quando você categoriza transações. Quando a descrição
+            de uma transação contém um padrão conhecido, a categoria é sugerida automaticamente.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="rounded-lg bg-muted p-4">
             <p className="text-sm">
-              <strong>Exemplo:</strong> Se você categorizar &quot;Uber&quot; como &quot;Transporte&quot;, o
-              sistema irá sugerir &quot;Transporte&quot; sempre que encontrar &quot;uber&quot; na descrição.
+              <strong>Exemplo:</strong> Se você categorizar &quot;Uber&quot; como
+              &quot;Transporte&quot;, o sistema irá sugerir &quot;Transporte&quot; sempre que
+              encontrar &quot;uber&quot; na descrição.
             </p>
           </div>
         </CardContent>
@@ -197,17 +194,15 @@ export default function CategorizationPage() {
       <Card>
         <CardHeader>
           <CardTitle>Regras Ativas</CardTitle>
-          <CardDescription>
-            {rules.filter((r) => r.isActive).length} regras ativas
-          </CardDescription>
+          <CardDescription>{rules.filter((r) => r.isActive).length} regras ativas</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <p className="text-muted-foreground">Carregando...</p>
           ) : rules.length === 0 ? (
             <p className="text-muted-foreground">
-              Nenhuma regra cadastrada. O sistema irá aprender automaticamente conforme
-              você categoriza transações.
+              Nenhuma regra cadastrada. O sistema irá aprender automaticamente conforme você
+              categoriza transações.
             </p>
           ) : (
             <div className="rounded-md border">

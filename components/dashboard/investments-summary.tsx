@@ -1,90 +1,72 @@
-// Card de resumo de investimentos do dashboard LMG
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { LucidePieChart } from "lucide-react"
+"use client"
 
-export interface Investment {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts"
+
+interface Investment {
   id: string
   type: string
-  value: number
-  profit: number
-  profitPercent: number
-  dividends: number
+  currentValue: number
 }
 
-export interface InvestmentsSummaryProps {
+interface InvestmentsSummaryProps {
   investments: Investment[]
 }
 
-const COLORS = ["#22c55e", "#3b82f6", "#eab308", "#a21caf", "#ef4444", "#64748b"]
-
-function formatCurrency(value: number) {
-  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-}
-
 export function InvestmentsSummary({ investments }: InvestmentsSummaryProps) {
-  // ...existing code...
-  const data = investments.map((inv) => ({ name: inv.type, value: inv.value }))
+  const allocationData = [
+    { name: "Renda Fixa", value: 40, color: "#22c55e" },
+    { name: "Ações", value: 35, color: "#eab308" },
+    { name: "FIIs", value: 25, color: "#ef4444" },
+  ]
+
+  const metrics = [
+    { label: "Rentabilidade", value: "12,5%", color: "text-white" },
+    { label: "Lucro", value: "R$ 4.200", color: "text-white" },
+    { label: "Dividendos", value: "R$ 350", color: "text-white" },
+  ]
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Card className="bg-dark border-2 border-teal-500 text-white">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <LucidePieChart className="text-teal-400" size={28} /> Alocação de Investimentos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+    <Card className="bg-[#18181b] border-2 border-teal-500 rounded-lg shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-white">Investimentos</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-center mb-4">
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
-                data={data}
+                data={allocationData}
                 cx="50%"
                 cy="50%"
-                outerRadius={70}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                labelLine={false}
+                label={({ value }) => `${value}%`}
+                outerRadius={60}
+                fill="#8884d8"
                 dataKey="value"
               >
-                {data.map((_entry, idx) => (
-                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
+                {allocationData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(v) => formatCurrency(v as number)}
-                labelStyle={{ color: "#0ff" }}
-                contentStyle={{ background: "#222", border: "none", color: "#fff" }}
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                iconType="circle"
+                wrapperStyle={{ color: "#fff", fontSize: "12px" }}
               />
-              <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
-      <Card className="bg-dark border-2 border-teal-500 text-white">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold">Carteira e Resultados</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            {investments.map((inv) => (
-              <div key={inv.id} className="flex flex-col gap-1 p-2 rounded bg-zinc-800">
-                <div className="flex justify-between text-sm">
-                  <span className="font-semibold">{inv.type}</span>
-                  <span>{formatCurrency(inv.value)}</span>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Lucro/Prejuízo:</span>
-                  <span>
-                    {formatCurrency(inv.profit)} ({inv.profitPercent.toFixed(1)}%)
-                  </span>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Dividendos:</span>
-                  <span>{formatCurrency(inv.dividends)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+        <div className="space-y-2 mt-4">
+          {metrics.map((metric, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">{metric.label}</span>
+              <span className={`text-sm font-bold ${metric.color}`}>{metric.value}</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   )
 }

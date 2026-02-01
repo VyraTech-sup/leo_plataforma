@@ -1,4 +1,5 @@
 "use client"
+import React from "react"
 
 interface Transaction {
   date: string
@@ -7,7 +8,7 @@ interface Transaction {
 }
 
 interface NetWorthChartProps {
-  transactions: Transaction[]
+  transactions?: Transaction[]
   initialBalance: number
 }
 
@@ -34,7 +35,7 @@ function groupByMonth(transactions: Transaction[]) {
   return map
 }
 
-export function NetWorthChart({ transactions, initialBalance }: NetWorthChartProps) {
+export function NetWorthChart({ transactions = [], initialBalance }: NetWorthChartProps) {
   // Agrupa por mês e calcula saldo acumulado
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date()
@@ -49,24 +50,42 @@ export function NetWorthChart({ transactions, initialBalance }: NetWorthChartPro
   })
 
   return (
-    <div className="bg-dark rounded-lg p-4 shadow-lg">
-      <h3 className="text-lg font-semibold mb-2 text-white">Evolução Patrimonial (6 meses)</h3>
-      <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="month" stroke="#fff" />
-          <YAxis
-            stroke="#fff"
-            tickFormatter={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-          />
-          <Tooltip
-            formatter={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-            labelStyle={{ color: "#0ff" }}
-            contentStyle={{ background: "#222", border: "none", color: "#fff" }}
-          />
-          <Line type="monotone" dataKey="saldo" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4 }} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="bg-[#18181b] border-2 border-teal-500 rounded-lg shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-white">Evolução Patrimonial</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis dataKey="month" stroke="#fff" />
+            <YAxis stroke="#fff" tickFormatter={formatCurrency} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#18181b",
+                border: "1px solid #14b8a6",
+                borderRadius: "8px",
+              }}
+              labelStyle={{ color: "#fff" }}
+              formatter={(value: number) => [formatCurrency(value as number), "Patrimônio"]}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#14b8a6"
+              strokeWidth={3}
+              dot={{ fill: "#14b8a6", r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <div className="mt-4 text-right">
+          <span className="text-sm text-gray-400">Valor Atual: </span>
+          <span className="text-lg font-bold text-teal-500">
+            {formatCurrency(data[data.length - 1].value)}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

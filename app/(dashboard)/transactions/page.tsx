@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import TransactionsTable from "@/components/transactions/transactions-table"
 import { TransactionFilters } from "@/components/transactions/transaction-filters"
@@ -65,24 +65,34 @@ export default function TransactionsPage() {
   const { toast } = useToast()
   const router = useRouter()
 
-  useEffect(() => {
-    fetchTransactions()
-  }, [pagination.page, filters])
-
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
-        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== "")),
+        search: filters.search,
+        category: filters.category,
+        subcategory: filters.subcategory,
+        paymentMethod: filters.paymentMethod,
+        competenceMonth: filters.competenceMonth,
+        status: filters.status,
+        accountId: filters.accountId,
+        type: filters.type,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
       })
-
       const response = await fetch(`/api/transactions?${params}`)
       if (response.ok) {
         const data = await response.json()
         setTransactions(data.transactions)
-        setPagination(data.pagination)
+        setPagination((prev) => ({
+          ...prev,
+          total: data.total,
+          totalPages: data.totalPages,
+        }))
+      } else {
+        throw new Error()
       }
     } catch (error) {
       toast({
@@ -93,24 +103,19 @@ export default function TransactionsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleEdit = (transaction: Transaction) => {
-    setEditingTransaction(transaction)
-    setIsDialogOpen(true)
-  }
+  }, [pagination.page, pagination.limit, filters, toast])
+  useEffect(() => {
+    fetchTransactions()
+  }, [fetchTransactions])
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta transação?")) return
-
     try {
       const response = await fetch(`/api/transactions/${id}`, { method: "DELETE" })
       if (response.ok) {
         toast({ title: "Transação excluída!", description: "A transação foi removida com sucesso" })
-
         // Disparar evento para atualizar o dashboard
         window.dispatchEvent(new CustomEvent("transaction-updated"))
-
         fetchTransactions()
       } else {
         throw new Error()
@@ -128,6 +133,11 @@ export default function TransactionsPage() {
     setIsDialogOpen(false)
     setEditingTransaction(null)
     fetchTransactions()
+  }
+
+  const handleEdit = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setIsDialogOpen(true)
   }
 
   return (

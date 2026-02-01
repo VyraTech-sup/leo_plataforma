@@ -44,26 +44,40 @@ export function CashFlowChart({ transactions }: CashFlowChartProps) {
   ]
 
   return (
-    <div className="bg-dark rounded-lg p-4 shadow-lg">
-      <h3 className="text-lg font-semibold mb-2 text-white">Receita vs Despesa do mês</h3>
-      <ResponsiveContainer width="100%" height={250}>
-        <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-          <XAxis dataKey="name" stroke="#fff" />
-          <YAxis
-            stroke="#fff"
-            tickFormatter={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-          />
-          <Tooltip
-            formatter={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-            labelStyle={{ color: "#0ff" }}
-            contentStyle={{ background: "#222", border: "none", color: "#fff" }}
-          />
-          <Legend />
-          <Bar dataKey="Receita" fill="#22c55e" radius={[8, 8, 0, 0]} />
-          <Bar dataKey="Despesa" fill="#ef4444" radius={[8, 8, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <Card className="bg-[#18181b] border-2 border-teal-500 rounded-lg shadow-lg">
+      <CardHeader>
+        <CardTitle className="text-white">Fluxo de Caixa</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-center gap-6 mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-500" />
+            <span className="text-sm text-gray-400">Receita</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <span className="text-sm text-gray-400">Despesa</span>
+          </div>
+        </div>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={chartData} barCategoryGap={40} barGap={8}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+            <XAxis dataKey="name" stroke="#fff" />
+            <YAxis stroke="#fff" tickFormatter={formatCurrency} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "#18181b",
+                border: "1px solid #14b8a6",
+                borderRadius: "8px",
+              }}
+              labelStyle={{ color: "#fff" }}
+              formatter={(value: number) => formatCurrency(value as number)}
+            />
+            <Bar dataKey="Receita" fill="#22c55e" radius={[8, 8, 0, 0]} />
+            <Bar dataKey="Despesa" fill="#ef4444" radius={[8, 8, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   )
 }

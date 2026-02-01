@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,7 +42,7 @@ export default function ReportsPage() {
     { value: 12, label: "Dezembro" },
   ]
 
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams({
@@ -67,11 +67,10 @@ export default function ReportsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
+  }, [reportType, selectedMonth, selectedYear, toast])
   useEffect(() => {
     fetchReport()
-  }, [reportType, selectedMonth, selectedYear])
+  }, [fetchReport])
 
   const handleExport = async (format: "csv" | "excel" | "pdf") => {
     setIsExporting(true)

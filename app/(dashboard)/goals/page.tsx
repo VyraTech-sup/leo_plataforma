@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Plus, Target } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { GoalCard } from "@/components/goals/goal-card"
@@ -35,7 +35,7 @@ export default function GoalsPage() {
   const [contributionGoal, setContributionGoal] = useState<Goal | null>(null)
   const { toast } = useToast()
 
-  const fetchGoals = async () => {
+  const fetchGoals = useCallback(async () => {
     setIsLoading(true)
     try {
       const response = await fetch("/api/goals")
@@ -52,11 +52,10 @@ export default function GoalsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
+  }, [toast])
   useEffect(() => {
     fetchGoals()
-  }, [])
+  }, [fetchGoals])
 
   const handleEdit = (goal: Goal) => {
     setEditingGoal(goal)
@@ -103,9 +102,7 @@ export default function GoalsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Metas Financeiras</h2>
-          <p className="text-muted-foreground">
-            Defina e acompanhe seus objetivos financeiros
-          </p>
+          <p className="text-muted-foreground">Defina e acompanhe seus objetivos financeiros</p>
         </div>
         <Button onClick={() => setIsDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -115,15 +112,9 @@ export default function GoalsPage() {
 
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">
-            Ativas ({activeGoals.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Concluídas ({completedGoals.length})
-          </TabsTrigger>
-          <TabsTrigger value="paused">
-            Pausadas ({pausedGoals.length})
-          </TabsTrigger>
+          <TabsTrigger value="active">Ativas ({activeGoals.length})</TabsTrigger>
+          <TabsTrigger value="completed">Concluídas ({completedGoals.length})</TabsTrigger>
+          <TabsTrigger value="paused">Pausadas ({pausedGoals.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">

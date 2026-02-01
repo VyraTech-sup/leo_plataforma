@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -61,11 +61,7 @@ export default function SettingsPage() {
     resolver: zodResolver(passwordSchema),
   })
 
-  useEffect(() => {
-    fetchUserInfo()
-  }, [])
-
-  const fetchUserInfo = async () => {
+  const fetchUserInfo = useCallback(async () => {
     try {
       const response = await fetch("/api/settings")
       if (response.ok) {
@@ -81,7 +77,10 @@ export default function SettingsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [profileForm, toast])
+  useEffect(() => {
+    fetchUserInfo()
+  }, [fetchUserInfo])
 
   const onSubmitProfile = async (data: ProfileFormData) => {
     setIsLoadingProfile(true)

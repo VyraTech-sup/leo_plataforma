@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -91,11 +91,7 @@ export default function CardsPage() {
   const selectedBrand = watch("brand")
   const selectedColor = watch("color")
 
-  useEffect(() => {
-    fetchCards()
-  }, [])
-
-  const fetchCards = async () => {
+  const fetchCards = useCallback(async () => {
     try {
       const response = await fetch("/api/cards")
       if (response.ok) {
@@ -109,7 +105,10 @@ export default function CardsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [toast])
+  useEffect(() => {
+    fetchCards()
+  }, [fetchCards])
 
   const onSubmit = async (data: CardFormData) => {
     try {

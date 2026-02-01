@@ -2,7 +2,7 @@
 import { InvestmentDrilldown } from "@/components/investments/investment-drilldown"
 import { AportRetiradaDialog } from "@/components/investments/aport-retirada-dialog"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -115,11 +115,7 @@ export default function InvestmentsPage() {
 
   const selectedType = watch("type")
 
-  useEffect(() => {
-    fetchInvestments()
-  }, [])
-
-  const fetchInvestments = async () => {
+  const fetchInvestments = useCallback(async () => {
     try {
       const response = await fetch("/api/investments")
       if (response.ok) {
@@ -133,7 +129,10 @@ export default function InvestmentsPage() {
         variant: "destructive",
       })
     }
-  }
+  }, [toast])
+  useEffect(() => {
+    fetchInvestments()
+  }, [fetchInvestments])
 
   const onSubmit = async (data: InvestmentFormData) => {
     try {

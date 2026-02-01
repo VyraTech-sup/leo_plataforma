@@ -1,5 +1,5 @@
 "use client"
-
+import React from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
 
 export interface Transaction {
@@ -10,7 +10,7 @@ export interface Transaction {
 }
 
 export interface CategoryChartProps {
-  transactions: Transaction[]
+  transactions?: Transaction[]
 }
 
 const COLORS = [
@@ -32,11 +32,11 @@ function groupExpensesByCategory(transactions: Transaction[]) {
   return Array.from(map.entries()).map(([category, total]) => ({ category, total }))
 }
 
-export function CategoryChart({ transactions }: CategoryChartProps) {
+export function CategoryChart({ transactions = [] }: CategoryChartProps) {
   const expenses = groupExpensesByCategory(transactions)
   if (!expenses.length) {
     return (
-      <div className="bg-dark rounded-lg p-4 shadow-lg">
+      <div className="bg-[#18181b] border-2 border-teal-500 rounded-lg p-4 shadow-lg">
         <h3 className="text-lg font-semibold mb-2 text-white">Gastos por Categoria</h3>
         <div className="flex h-[250px] items-center justify-center text-muted-foreground">
           Nenhuma despesa registrada neste mês.
@@ -47,7 +47,7 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
   const chartData = expenses.map((item) => ({ name: item.category, value: Math.abs(item.total) }))
 
   return (
-    <div className="bg-dark rounded-lg p-4 shadow-lg">
+    <div className="bg-[#18181b] border-2 border-teal-500 rounded-lg p-4 shadow-lg">
       <h3 className="text-lg font-semibold mb-2 text-white">Gastos por Categoria</h3>
       <ResponsiveContainer width="100%" height={250}>
         <PieChart>
@@ -66,11 +66,22 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
-            labelStyle={{ color: "#0ff" }}
-            contentStyle={{ background: "#222", border: "none", color: "#fff" }}
+            contentStyle={{
+              backgroundColor: "#18181b",
+              border: "1px solid #14b8a6",
+              borderRadius: "8px",
+            }}
+            labelStyle={{ color: "#fff" }}
+            formatter={(value: number) =>
+              value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+            }
           />
-          <Legend />
+          <Legend
+            verticalAlign="bottom"
+            height={36}
+            iconType="circle"
+            wrapperStyle={{ color: "#fff" }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>
